@@ -4,6 +4,7 @@ apply plugin: 'com.github.triplet.play'
 
 play {
     track = 'alpha'
+    uploadImages = true
     jsonFile = file('play-keys.json')
 }
 
