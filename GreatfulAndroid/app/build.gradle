@@ -47,7 +47,7 @@ android {
         applicationId "world.greatful"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 5
+        versionCode 6
         versionName "0.0.0"
 
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
