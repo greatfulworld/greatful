@@ -18,6 +18,18 @@ def keystoreProperties = new Properties()
 // Load your keystore.properties file into the keystoreProperties object.
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
+def renameArtifact(variant, applicationId) {
+    variant.outputs.each { output ->
+        def newApkName
+        newApkName = "${applicationId}"
+        newApkName = "${newApkName}-${output.baseName}"
+        newApkName = "${newApkName}-${variant.versionName}"
+        newApkName = "${newApkName}-${variant.versionCode}"
+        newApkName = "${newApkName}.apk"
+        output.outputFile = new File(output.outputFile.parent, newApkName)
+    }
+}
+
 android {
     signingConfigs {
         release {
@@ -61,15 +73,12 @@ android {
 
     // Create a meaningful APK filename.
     applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            def newApkName
-            newApkName = "${applicationId}"
-            newApkName = "${newApkName}-${output.baseName}"
-            newApkName = "${newApkName}-${variant.versionName}"
-            newApkName = "${newApkName}-${variant.versionCode}"
-            newApkName = "${newApkName}.apk"
-            output.outputFile = new File(output.outputFile.parent, newApkName)
-        }
+        renameArtifact(variant, applicationId)
+    }
+
+    // Create a meaningful test APK filename.
+    testVariants.all { variant ->
+        renameArtifact(variant, applicationId)
     }
 
     // If you need to add more flavors, consider using flavor dimensions.
