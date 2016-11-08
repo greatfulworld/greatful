@@ -42,3 +42,6 @@ keystore.properties
 
 # Google API Credentials
 play-keys.json
+
+# Firebase Configuration
+google-services.json
