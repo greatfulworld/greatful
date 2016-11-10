@@ -47,8 +47,8 @@ android {
         applicationId "world.greatful"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9
-        versionName "0.0.0"
+        versionCode 10
+        versionName "0.0.10"
 
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
@@ -117,7 +117,9 @@ dependencies {
     compile "com.android.support:support-v4:$rootProject.supportLibraryVersion"
     compile "com.android.support.test.espresso:espresso-idling-resource:$rootProject.espressoVersion"
     compile "com.google.guava:guava:$rootProject.guavaVersion"
+
     compile "com.google.android.gms:play-services-drive:$rootProject.playServicesVersion"
+    compile "com.google.firebase:firebase-crash:$rootProject.playServicesVersion"
 
     // Dependencies for local unit tests
     testCompile "junit:junit:$rootProject.ext.junitVersion"

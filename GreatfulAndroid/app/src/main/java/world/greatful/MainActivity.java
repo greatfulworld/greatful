@@ -30,6 +30,7 @@ import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveApi;
 import com.google.android.gms.drive.Metadata;
 import com.google.android.gms.drive.MetadataBuffer;
+import com.google.firebase.crash.FirebaseCrash;
 
 /**
  * Main activity.
@@ -88,6 +89,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     }
 
     private void checkAppFolder() {
+        FirebaseCrash.log("checkAppFolder");
         ResultCallback<DriveApi.MetadataBufferResult> cb;
         cb = new ResultCallback<DriveApi.MetadataBufferResult>() {
             @Override
