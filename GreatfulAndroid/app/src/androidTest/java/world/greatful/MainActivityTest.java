@@ -17,28 +17,47 @@
 package world.greatful;
 
 import android.support.test.filters.SmallTest;
+import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+
+import static android.support.test.InstrumentationRegistry.getContext;
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MainActivityTest {
 
-    public static final String TEST_STRING = "This is a string";
-    public static final long TEST_LONG = 12345678L;
+    @Rule
+    public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule(MainActivity.class);
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        clearAppData(getContext().getPackageName());
     }
 
     @Test
-    public void testNoOp() {
-        int one = 1;
-        // Verify that the received data is correct.
-        assertThat(one, is(1));
+    public void textViews_areDisplayed() {
+        onView(withId(R.id.app_folder_text))
+            .check(matches(isDisplayed()));
+        onView(withId(R.id.greeting_text))
+            .check(matches(isDisplayed()));
+    }
+
+    private static void clearAppData(String packageName) {
+        try {
+            // clearing app data
+            Runtime runtime = Runtime.getRuntime();
+            runtime.exec(String.format("pm clear %s", packageName));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

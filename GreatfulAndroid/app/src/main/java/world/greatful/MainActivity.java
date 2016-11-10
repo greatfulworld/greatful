@@ -17,8 +17,13 @@
 package world.greatful;
 
 import android.app.Activity;
+import android.app.KeyguardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -39,7 +44,8 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final int PLAY_AVAILABLE_REQUEST = 9000;
+    private static final int RESOLVE_CONNECTION_REQUEST = 9001;
 
     private GoogleApiClient mGoogleApiClient;
     private TextView mAppFolderText;
@@ -49,6 +55,13 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
         mAppFolderText = (TextView) findViewById(R.id.app_folder_text);
+
+        if (BuildConfig.DEBUG) {
+            KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+            KeyguardManager.KeyguardLock keyguardLock = km.newKeyguardLock(TAG);
+            keyguardLock.disableKeyguard();
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        }
 
         if (checkPlayServices()) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -76,11 +89,37 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     @Override
     public void onConnectionFailed(ConnectionResult result) {
         Log.d(TAG, "onConnectionFailed: " + result.toString());
+        if (result.hasResolution()) {
+            try {
+                result.startResolutionForResult(this, RESOLVE_CONNECTION_REQUEST);
+            } catch (IntentSender.SendIntentException e) {
+                // Unable to resolve, message user appropriately
+            }
+        } else {
+            checkPlayServices();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        switch (requestCode) {
+            case PLAY_AVAILABLE_REQUEST:
+                if (resultCode == RESULT_OK) {
+                    mGoogleApiClient.connect();
+                }
+                break;
+            case RESOLVE_CONNECTION_REQUEST:
+                if (resultCode == RESULT_OK) {
+                    mGoogleApiClient.connect();
+                }
+                break;
+        }
     }
 
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.d(TAG, "onConnected");
+        checkAppFolder();
     }
 
     @Override
@@ -127,7 +166,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         if(result != ConnectionResult.SUCCESS) {
             if(availability.isUserResolvableError(result)) {
                 availability.getErrorDialog(this, result,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+                        PLAY_AVAILABLE_REQUEST).show();
             }
             return false;
         }
