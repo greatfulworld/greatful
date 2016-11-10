@@ -47,8 +47,8 @@ android {
         applicationId "world.greatful"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10
-        versionName "0.0.10"
+        versionCode 11
+        versionName "0.0.11"
 
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
@@ -119,6 +119,7 @@ dependencies {
     compile "com.google.guava:guava:$rootProject.guavaVersion"
 
     compile "com.google.android.gms:play-services-drive:$rootProject.playServicesVersion"
+    compile "com.google.firebase:firebase-core:$rootProject.playServicesVersion"
     compile "com.google.firebase:firebase-crash:$rootProject.playServicesVersion"
 
     // Dependencies for local unit tests
