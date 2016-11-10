@@ -47,7 +47,7 @@ android {
         applicationId "world.greatful"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
+        versionCode 8
         versionName "0.0.0"
 
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
@@ -83,9 +83,6 @@ android {
 
     // If you need to add more flavors, consider using flavor dimensions.
     productFlavors {
-        mock {
-            applicationIdSuffix = ".mock"
-        }
         prod {
 
         }
