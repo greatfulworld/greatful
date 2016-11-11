@@ -45,8 +45,6 @@ public class MainActivityTest {
 
     @Test
     public void textViews_areDisplayed() {
-        onView(withId(R.id.app_folder_text))
-            .check(matches(isDisplayed()));
         onView(withId(R.id.greeting_text))
             .check(matches(isDisplayed()));
     }

@@ -21,7 +21,10 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.WindowManager;
 import android.view.View;
@@ -39,6 +42,8 @@ import com.google.android.gms.drive.Metadata;
 import com.google.android.gms.drive.MetadataBuffer;
 import com.google.firebase.crash.FirebaseCrash;
 
+import world.greatful.sync.FeedContract;
+
 /**
  * Main activity.
  */
@@ -53,7 +58,9 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     private GoogleApiClient mGoogleApiClient;
     private ConnectionResult mConnectionResult;
 
-    private TextView mAppFolderText;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
     private Button mDriveSaveBtn;
     private Button mDriveClearBtn;
 
@@ -61,9 +68,16 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-        mAppFolderText = (TextView) findViewById(R.id.app_folder_text);
-        mDriveSaveBtn = (Button) findViewById(R.id.drive_save_btn);
-        mDriveClearBtn = (Button) findViewById(R.id.drive_clear_btn);
+
+        // Feed views.
+        mRecyclerView = (RecyclerView) findViewById(R.id.feed_recycler_view);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        Cursor cursor = getContentResolver()
+                .query(FeedContract.Entry.CONTENT_URI, null, null, null, null);
+        mAdapter = new FeedAdapter(this, cursor);
+        mRecyclerView.setAdapter(mAdapter);
 
         // When running instrumentation tests with debug APKs
         // we need to turn on the screen programmatically.
@@ -85,6 +99,9 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
                 .build();
         }
 
+        // Google Drive buttons.
+        mDriveSaveBtn = (Button) findViewById(R.id.drive_save_btn);
+        mDriveClearBtn = (Button) findViewById(R.id.drive_clear_btn);
         mDriveSaveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -200,7 +217,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
                     appFolderText += "DriveId: " + driveId + ", Title: "
                             + title + "\n";
                 }
-                mAppFolderText.setText(appFolderText);
                 Log.d(TAG, "appFolderText:\n" + appFolderText);
             }
         };
