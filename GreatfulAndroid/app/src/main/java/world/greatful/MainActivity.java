@@ -18,9 +18,13 @@ package world.greatful;
 
 import android.app.Activity;
 import android.app.KeyguardManager;
+import android.app.LoaderManager;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -48,10 +52,11 @@ import world.greatful.sync.FeedContract;
  * Main activity.
  */
 public class MainActivity extends Activity implements ConnectionCallbacks,
-        OnConnectionFailedListener {
+        OnConnectionFailedListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    private static final int FEED_LOADER = 0;
     private static final int PLAY_AVAILABLE_REQUEST = 9000;
     private static final int RESOLVE_CONNECTION_REQUEST = 9001;
 
@@ -59,8 +64,10 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     private ConnectionResult mConnectionResult;
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private FeedAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private Button mAddBtn;
+    private Button mRemoveBtn;
     private Button mDriveSaveBtn;
     private Button mDriveClearBtn;
 
@@ -78,6 +85,22 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
                 .query(FeedContract.Entry.CONTENT_URI, null, null, null, null);
         mAdapter = new FeedAdapter(this, cursor);
         mRecyclerView.setAdapter(mAdapter);
+        getLoaderManager().initLoader(FEED_LOADER, null, this);
+
+        mAddBtn = (Button) findViewById(R.id.add_item_btn);
+        mRemoveBtn = (Button) findViewById(R.id.remove_item_btn);
+        mAddBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                insertFeedItem();
+            }
+        });
+        mRemoveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteAllFeedItems();
+            }
+        });
 
         // When running instrumentation tests with debug APKs
         // we need to turn on the screen programmatically.
@@ -223,6 +246,46 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         Drive.DriveApi.getAppFolder(mGoogleApiClient)
                 .listChildren(mGoogleApiClient)
                 .setResultCallback(cb);
+    }
+
+    private void deleteAllFeedItems() {
+        getContentResolver().delete(FeedContract.Entry.CONTENT_URI, null, null);
+    }
+
+    private void insertFeedItem() {
+        ContentValues values = new ContentValues();
+        String entryId = "a1";
+        String title = "Item!";
+        values.put(FeedContract.Entry.COLUMN_NAME_ENTRY_ID, entryId);
+        values.put(FeedContract.Entry.COLUMN_NAME_TITLE, title);
+        getContentResolver().insert(FeedContract.Entry.CONTENT_URI, values);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        switch(id) {
+            case FEED_LOADER:
+                return new CursorLoader(
+                        MainActivity.this,
+                        FeedContract.Entry.CONTENT_URI,
+                        new String[] { "_id", FeedContract.Entry.COLUMN_NAME_TITLE },
+                        null /* Selection clause */,
+                        null /* Selection args */,
+                        null /* Sort order */
+                );
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
     }
 
     private boolean checkPlayServices() {
