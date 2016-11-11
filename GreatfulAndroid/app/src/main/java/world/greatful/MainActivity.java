@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Greatful World.
+ * Copyright 2016 Greatful World. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -44,18 +46,27 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
     private static final int PLAY_AVAILABLE_REQUEST = 9000;
     private static final int RESOLVE_CONNECTION_REQUEST = 9001;
 
     private GoogleApiClient mGoogleApiClient;
+    private ConnectionResult mConnectionResult;
+
     private TextView mAppFolderText;
+    private Button mDriveSaveBtn;
+    private Button mDriveClearBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
         mAppFolderText = (TextView) findViewById(R.id.app_folder_text);
+        mDriveSaveBtn = (Button) findViewById(R.id.drive_save_btn);
+        mDriveClearBtn = (Button) findViewById(R.id.drive_clear_btn);
 
+        // When running instrumentation tests with debug APKs
+        // we need to turn on the screen programmatically.
         if (BuildConfig.DEBUG) {
             KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
             KeyguardManager.KeyguardLock keyguardLock = km.newKeyguardLock(TAG);
@@ -73,6 +84,19 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
                 .addOnConnectionFailedListener(this)
                 .build();
         }
+
+        mDriveSaveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resolveConnectionResult();
+            }
+        });
+        mDriveClearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetGooglePlayServices();
+            }
+        });
     }
 
     @Override
@@ -90,15 +114,31 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     @Override
     public void onConnectionFailed(ConnectionResult result) {
         Log.d(TAG, "onConnectionFailed: " + result.toString());
-        if (result.hasResolution()) {
-            try {
-                result.startResolutionForResult(this, RESOLVE_CONNECTION_REQUEST);
-            } catch (IntentSender.SendIntentException e) {
-                // Unable to resolve, message user appropriately
-            }
+        mConnectionResult = result;
+
+        if (mConnectionResult.hasResolution()) {
+            mDriveSaveBtn.setVisibility(View.VISIBLE);
+            mDriveClearBtn.setVisibility(View.GONE);
         } else {
+            mDriveSaveBtn.setVisibility(View.GONE);
+            mDriveClearBtn.setVisibility(View.GONE);
             checkPlayServices();
         }
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        Log.d(TAG, "onConnected");
+        mConnectionResult = null;
+        mDriveSaveBtn.setVisibility(View.GONE);
+        mDriveClearBtn.setVisibility(View.VISIBLE);
+
+        checkAppFolder();
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        Log.d(TAG, "onConnectionSuspended");
     }
 
     @Override
@@ -117,15 +157,24 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         }
     }
 
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        Log.d(TAG, "onConnected");
-        checkAppFolder();
+    private void resolveConnectionResult() {
+        Log.d(TAG, "resolveConnectionResult");
+
+        if (mConnectionResult == null) {
+            return;
+        }
+        try {
+            mConnectionResult.startResolutionForResult(this, RESOLVE_CONNECTION_REQUEST);
+        } catch (IntentSender.SendIntentException e) {
+            // Unable to resolve, message user appropriately
+        }
     }
 
-    @Override
-    public void onConnectionSuspended(int cause) {
-        Log.d(TAG, "onConnectionSuspended");
+    private void resetGooglePlayServices() {
+        if (mGoogleApiClient == null) {
+            return;
+        }
+        mGoogleApiClient.clearDefaultAccountAndReconnect();
     }
 
     private void checkAppFolder() {
@@ -159,7 +208,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
                 .listChildren(mGoogleApiClient)
                 .setResultCallback(cb);
     }
-
 
     private boolean checkPlayServices() {
         GoogleApiAvailability availability = GoogleApiAvailability.getInstance();

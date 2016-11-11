@@ -22,21 +22,37 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-   <TextView
-      android:id="@+id/greeting_text"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_centerHorizontal="true"
-      android:layout_centerVertical="true"
-      android:padding="16dp"
-      android:text="@string/hello_world"
-      tools:context=".MainActivity" />
+    <Button
+        android:id="@+id/drive_save_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="@string/save_with_drive"
+        android:visibility="gone"
+        tools:context=".MainActivity" />
 
-   <TextView
-      android:id="@+id/app_folder_text"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:padding="16dp"
-      tools:context=".MainActivity" />
+    <Button
+        android:id="@+id/drive_clear_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="@string/disconnect_drive_account"
+        android:visibility="gone"
+        tools:context=".MainActivity" />
+
+    <TextView
+        android:id="@+id/greeting_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="@string/hello_world"
+        tools:context=".MainActivity" />
+
+    <TextView
+        android:id="@+id/app_folder_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        tools:context=".MainActivity" />
 
 </LinearLayout>
