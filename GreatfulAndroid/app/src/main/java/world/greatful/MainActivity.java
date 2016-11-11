@@ -59,6 +59,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         if (BuildConfig.DEBUG) {
             KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
             KeyguardManager.KeyguardLock keyguardLock = km.newKeyguardLock(TAG);
+            //noinspection MissingPermission
             keyguardLock.disableKeyguard();
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         }
